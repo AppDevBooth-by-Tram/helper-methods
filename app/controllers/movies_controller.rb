@@ -10,7 +10,7 @@ class MoviesController < ApplicationController
 
     respond_to do |format|
       format.json do
-        render json: @list_of_movies
+        render json: @movies
       end
 
       format.html 
@@ -22,20 +22,18 @@ class MoviesController < ApplicationController
   end
 
   def create
-    @movie = Movie.new
-    @movie.title = params.fetch(:movie).fetch(:title)
-    @movie.description = params.fetch(:movie).fetch(:description)
-
+    movie_attributes = params.require(:movie).permit(:title, :description) #:movie is a hash contain multiple movie attributes
+    @movie = Movie.new(movie_attributes)
+  
     if @movie.valid?
       @movie.save
       redirect_to movies_url, notice: "Movie created successfully." 
     else
-      render "/new" #only dropped folder because action doesn't make template name
+      render "movies/new" #only dropped folder because action doesn't make template name
     end
   end
 
   def edit
-  
     @movie = Movie.find(params.fetch(:id))
 
     render template: "movies/edit"
@@ -43,9 +41,7 @@ class MoviesController < ApplicationController
 
   def update
     @movie = Movie.find( params.fetch(:id))
-
-    @movie.title = params.fetch(:title)
-    @movie.description = params.fetch(:description)
+    @movie.attributes = params.require(:movie).permit(:title, :description)
 
     if @movie.valid?
       @movie.save
